@@ -101,7 +101,7 @@ while read LINE ; do
 			# Envoyer la réponse automatique
 			mail_from=${to}
 			mail_to=${from}
-			mail_subj=$(SujbEncode "${SUBJECT}")
+			mail_subj=$(HdrEncode "${SUBJECT}")
 			cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
 
 			# Inscrire l'adresse de l'expéditeur dans le cache

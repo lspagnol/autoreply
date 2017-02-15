@@ -163,7 +163,7 @@ while read LINE ; do
 							esac
 
 							# Message de notification
-							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ANSWER_RECORD} ${ORIGIN}")
+							mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_ANSWER_RECORD} ${ORIGIN}")
 
 						;;
 
@@ -177,7 +177,7 @@ while read LINE ; do
 							msg=${ANSWER}
 
 							# Message de notification
-							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ANSWER_DEFAULT} ${ORIGIN}")
+							mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_ANSWER_DEFAULT} ${ORIGIN}")
 
 						;;
 
@@ -247,7 +247,7 @@ while read LINE ; do
 					echo -e "BEGIN=\"${BEGIN}\"\nEND=\"${END}\"\nDATES=\"${DATES}\"\n" > "${MACHINES}/${1}/cfg"
 
 					# Notification
-					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ENABLE} ${ORIGIN}")
+					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_ENABLE} ${ORIGIN}")
 					cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
 
 					# FIN
@@ -270,7 +270,7 @@ while read LINE ; do
 					rm ${CACHE}/${1}/* 2>/dev/null
 
 					# Notification
-					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_DISABLE} ${ORIGIN}")
+					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_DISABLE} ${ORIGIN}")
 					cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
 
 					# FIN
@@ -288,7 +288,7 @@ while read LINE ; do
 							. ${MACHINES}/${1}/cfg
 
 							# Notification
-							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_STATUS_ENABLED}")
+							mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_STATUS_ENABLED}")
 							cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
 
 							# FIN
@@ -299,7 +299,7 @@ while read LINE ; do
 					fi
 
 					# Le répondeur n'est pas activé => notification
-					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_STATUS_DISABLED}")
+					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_STATUS_DISABLED}")
 					cat ${msg} |MailSend
 
 					# FIN

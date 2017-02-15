@@ -49,15 +49,15 @@ v="$(mktemp -u)-$(mktemp -u)"
 echo "${v//\/tmp\/tmp./}"
 }
 
-# Encoder une chaine au format RFC 2047
+# Encoder un header au format RFC 2047
 # => Résultat sur sortie standard.
-function SujbEncode {
+function HdrEncode {
 mailutils 2047 -e --charset=utf-8 "${@}"
 }
 
-# Décoder une chaine au format RFC 2047
+# Décoder un header au format RFC 2047
 # => Résultat sur sortie standard.
-function SujbDecode {
+function HdrDecode {
 mailutils 2047 -d --charset=utf-8 "${@}"
 }
 
