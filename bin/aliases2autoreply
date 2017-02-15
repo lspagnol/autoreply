@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Génération des tables du répondeur pour Postfix:
+# /etc/autoreply/bcc-reply
+# /etc/autoreply/aliases-reply
+# /etc/autoreply/aliases-config
+
+########################################################################
+# Utilisation:
+
+# Argument: table d'aliases
+
+# Exemple:
+# /usr/local/autoreply/aliases2autoreply /etc/sympa/adresses_generiques
+
+########################################################################
+
+[ -z "${1}" ] && exit 1
+[ -f ${1} ] || exit 1
+
+########################################################################
+
+# Charger le fichier de configuration
+if [ -f /etc/autoreply/autoreply.cf ] ; then
+	. /etc/autoreply/autoreply.cf
+else
+	exit
+fi
+
+########################################################################
+
+SRC=${1}
+TMP=${CACHE}/$(basename ${1})
+
+# Pas de traitement si la table d'aliases n'a pas été modifiée.
+touch ${TMP}
+diff ${TMP} ${SRC} >/dev/null
+[ $? -eq 0 ] && exit 0
+
+cat ${SRC} |awk '{print $1" "$1"-reply"}' > /etc/autoreply/bcc-reply
+cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-reply: \"| /usr/local/autoreply/reply "$1"@"DOMAIN"\""}' > /etc/autoreply/aliases-reply
+cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-autoreply: \"| /usr/local/autoreply/config "$1"@"DOMAIN"\""}' > /etc/autoreply/aliases-config
+
+postmap /etc/autoreply/bcc-reply
+postalias /etc/autoreply/aliases-reply
+postalias /etc/autoreply/aliases-config
+
+service postfix reload
+
+cp ${SRC} ${TMP}

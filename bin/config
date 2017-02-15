@@ -1,0 +1,323 @@
+#!/bin/bash
+
+##########################################################################################################
+
+# Pas d'argument => FIN
+[ -z "${1}" ] && exit 0
+
+# L'adresse de destination est passée en argument à partir de la table
+# d'aliases "/etc/autoreply/aliases-config".
+to=${1}
+
+##########################################################################################################
+
+# Charger les fonctions
+. /usr/local/autoreply/functions.sh
+
+##########################################################################################################
+
+# Lecture du mail passé sur l'entrée standard ligne par ligne
+while read LINE ; do
+
+	# Conversion ligne en tableau
+	L=(${LINE})
+
+	# Extraction nom entête et conversion en minuscules
+	H=${L[0],,}
+
+	case ${H} in
+
+		# Extraction "Return-Path"
+		return-path:)
+			[ "${L[1]}" = "<>" ] && exit 0 # adresse vide => le plus souvent: notification de non-remise
+			return_path=${L[1],,}
+			return_path=${return_path#<}
+			return_path=${return_path%>}
+		;;
+
+		# Le message vient d'une liste de diffusion ?
+		list-id:|list-archive:|list-help:|list-owner:|list-post:|list-subscribe:|list-unsubscribe:)
+			exit 0
+		;;
+
+		# Idem
+		precedence:)
+			[ "${L[1],,}" = "list" ] && exit 0
+		;;
+
+		# Le message est une réponse automatique ?
+		auto-submitted:)
+			[ "${L[1],,}" != "no" ] && exit 0
+		;;
+
+		# Extraction adresse expéditeur
+		from:)
+			from=$(GetFromAddr ${LINE})
+		;;
+
+		# Extraction de l'ID du message
+		message-id:)
+			message_id=${L[1]}
+		;;
+
+		# Extraction sujet
+		subject:)
+			subject=${LINE,,}
+			subject=(${subject})
+		;;
+
+		# Extraction "content-type" et "charset"
+		content-type:)
+			content=${L[1],,} # type de contenu (text/plain, multipart ...)
+			charset=${L[2],,} # jeu de caractères
+			charset=${charset#*=} # ne conserver que la valeur
+			charset=${charset%;} # supprimer le point-virgule
+		;;
+
+		content-transfer-encoding:)
+			encoding=${L[1],,}
+			encoding=${encoding%;} # supprimer le point-virgule
+		;;
+
+		################################################################
+		# Des headers supplémentaires peuvent être extraits à l'aide du
+		# script optionnel '/etc/autoreply/headers.sh'.
+		################################################################
+
+		# Fin des entêtes => on a toutes les données nécessaires
+		"")
+
+			# Pas d'adresse d'expéditeur => fin
+			[ -z "${from}" ] && exit 0
+
+			# Pas de sujet => fin
+			[ -z "${subject}" ] && exit 0
+
+			############################################################
+			# Un traitement spécifique optionnel permet de déterminer
+			# l'origine et la légitimité d'une commande.
+			[ -f /etc/autoreply/origin.sh ] && . /etc/autoreply/origin.sh
+			############################################################
+
+			# Origine par défaut de la demande
+			ORIGIN=${ORIGIN:-${from}}
+
+			# Choix du fichier utilisé pour le mail de notification
+			[ -f ${MACHINES}/${1}/msg ] && msg=${MACHINES}/${1}/msg || msg=${ANSWER}
+
+			# L'adresse d'expéditeur est celle du répondeur
+			mail_from=${to}
+
+			case ${subject[1]} in
+				answer|default|enable|disable)
+					# Modification du répondeur => notifier l'expéditeur ET l'adresse du répondeur
+					mail_to="${from} ${to}"
+				;;
+				status)
+					# Notifier seulement l'expéditeur
+					mail_to=${from}
+				;;
+				*)
+					# Pas de commande => FIN
+					exit 0
+				;;
+			esac
+
+			case ${subject[1]} in
+
+				answer) # Réglage du message de réponse
+
+					case ${subject[2]} in
+
+						record) # Enregistrer le message reçu comme message de réponse
+
+							# Le message DOIT être au format text/plain (pas de HTML)
+							[ "${content}" = "text/plain;" ] || exit 0
+
+							# Créer le répertoire de configuration
+							[ -d ${MACHINES}/${1} ] || mkdir ${MACHINES}/${1}
+
+							# Supprimer le message existant
+							[ -f ${msg} ] && rm ${msg}
+
+							# Extraire le message
+							tmp=$(mktemp)
+							msg=${MACHINES}/${1}/msg
+							while read LINE ; do
+								echo "${LINE}" >> ${tmp}
+							done
+
+							# Décoder et enregistrer le message
+							case ${encoding} in
+								8bit)
+									cat ${tmp} |mailutils filter iconv ${charset} utf-8 > ${msg}
+									rm ${tmp}
+								;;
+								quoted-printable)
+									cat ${tmp} |mailutils filter -d quoted-printable + iconv ${charset} utf-8 > ${msg}
+									rm ${tmp}
+								;;
+								*)
+									exit 0 # cas pas prévu => FIN
+								;;
+							esac
+
+							# Message de notification
+							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ANSWER_RECORD} ${ORIGIN}")
+
+						;;
+
+						default) # Supprimer le message personalisé s'il existe (le message par défaut sera utilisé)
+						
+							# Supprimer le message existant
+							msg=${MACHINES}/${1}/msg
+							[ -f ${msg} ] && rm ${msg}
+
+							# Repasser sur le message par défaut
+							msg=${ANSWER}
+
+							# Message de notification
+							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ANSWER_DEFAULT} ${ORIGIN}")
+
+						;;
+
+						*)
+
+							# Rien à faire ! => FIN
+							exit 0
+
+						;;
+
+					esac
+
+					# Envoyer le message de notification
+					cat ${msg} |MailSend
+
+					# FIN
+					exit 0
+
+				;;
+
+				enable) # Activer le répondeur
+
+					# Extraire date début
+					begin=${subject[2]}
+					if [ -z ${begin} ] ; then # pas de date de debut => aujourd'hui
+						_begin=$(date -d "today" +%d/%m/%Y) # format EU
+						begin=$(date -d "today" +%m/%d/%Y) # format US
+					else
+						_begin=${begin} # format EU
+						begin=$(DateSwap ${begin}) # permutation => format US
+					fi
+
+					# Extraire date fin
+					end=${subject[3]}
+					if [ -z ${end} ] ; then # pas de date => utiliser date début
+						_end=${_begin} # format EU
+						end=${begin} # format US
+					else
+						_end=${end} # format EU
+						end=$(DateSwap ${end}) # permutation => format US
+					fi
+
+					# Conversion dates format US en timestamp
+					BEGIN=$(date -d "${begin}" +%s 2>/dev/null)
+					END=$(date -d "${end} + 24 hours" +%s 2>/dev/null) # Ajouter 24 heures
+					((END--)) # Enlever 1 seconde
+
+					# Vérification de la cohérence des dates
+					[ ${END} -gt ${BEGIN} ] || exit 0
+
+					# Conversion des dates format EU pour la substition / motifs
+					_begin=$(Date4Sed ${_begin})
+					_end=$(Date4Sed ${_end})
+
+					# Création chaine de substitution pour les dates
+					if [ "${begin}" = "${end}" ] ; then
+						# Effectuer la substitution au cas ou le texte contiendrai une date
+						DATES="${DATES_TODAY//##TODAY##/${_begin}}"
+					else
+						DATES=${DATES_RANGE}
+						DATES="${DATES//##BEGIN##/${_begin}}"
+						DATES="${DATES//##END##/${_end}}"
+					fi
+
+					# Enregistrer la configuration
+					[ -d ${MACHINES}/${1} ] || mkdir ${MACHINES}/${1}
+					echo -e "BEGIN=\"${BEGIN}\"\nEND=\"${END}\"\nDATES=\"${DATES}\"\n" > "${MACHINES}/${1}/cfg"
+
+					# Notification
+					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_ENABLE} ${ORIGIN}")
+					cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
+
+					# FIN
+					exit 0					
+
+				;;
+
+				disable)
+
+					# Pas de répertoire de configuration pour ce répondeur => fin
+					[ -d ${MACHINES}/${1} ] || exit 0
+
+					# Charger la config du répondeur si elle existe, sinon => fin
+					[ -f ${MACHINES}/${1}/cfg ] && . ${MACHINES}/${1}/cfg || exit 0
+
+					# Supprimer la configuration
+					rm ${MACHINES}/${1}/cfg
+
+					# Purger le cache d'adresses
+					rm ${CACHE}/${1}/* 2>/dev/null
+
+					# Notification
+					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_DISABLE} ${ORIGIN}")
+					cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
+
+					# FIN
+					exit 0					
+
+				;;
+
+				status)
+
+					if [ -d ${MACHINES}/${1} ] ; then
+
+						if [ -f ${MACHINES}/${1}/cfg ] ; then # Le répondeur est activé
+
+							# Charger la config du répondeur
+							. ${MACHINES}/${1}/cfg
+
+							# Notification
+							mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_STATUS_ENABLED}")
+							cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
+
+							# FIN
+							exit 0
+
+						fi
+
+					fi
+
+					# Le répondeur n'est pas activé => notification
+					mail_subj=$(SujbEncode "${SUBJECT}: ${NOTIF_STATUS_DISABLED}")
+					cat ${msg} |MailSend
+
+					# FIN
+					exit 0
+
+				;;
+
+			esac
+
+		;;
+
+		*)
+
+			# Extraction de headers spécifiques
+			[ -f /etc/autoreply/headers.sh ] && . /etc/autoreply/headers.sh
+
+		;;
+
+	esac
+
+done

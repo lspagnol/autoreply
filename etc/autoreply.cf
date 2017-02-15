@@ -1,0 +1,32 @@
+# Configuration des répondeurs
+MACHINES=/var/lib/autoreply
+
+# Cache des adresses d'expéditeurs
+CACHE=/var/cache/autoreply
+
+# Message de réponse par défaut
+ANSWER=/etc/autoreply/msg
+
+DATES_TODAY="aujourd'hui"
+#DATES_TODAY="le ##TODAY##"
+DATES_RANGE="du ##BEGIN## au ##END## inclus"
+
+# Sujet
+SUBJECT="Répondeur automatique"
+
+# Ne pas répondre si l'adresse d'expéditeur correspond à cette expression
+NOREPLY_EXPR="^(root|postmaster|listmaster|sympa|cron|noreply|no-reply|bounce)@"
+
+# Répondre une seule fois à un expéditeur sur cette période (en jours)
+DAYS=7
+
+# Notifications par défaut (texte à ajouter au sujet)
+NOTIF_ENABLE="activé par"
+NOTIF_DISABLE="désactivé par"
+NOTIF_STATUS_ENABLED="activé"
+NOTIF_STATUS_DISABLED="désactivé"
+NOTIF_ANSWER_RECORD="réponse enregistrée par"
+NOTIF_ANSWER_DEFAULT="réponse réinitialisée par"
+
+# Domaine de messagerie
+DOMAIN="mondomaine.fr"

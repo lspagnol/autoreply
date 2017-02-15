@@ -1,0 +1,14 @@
+#! /bin/bash
+
+########################################################################
+
+# Charger le fichier de configuration
+if [ -f /etc/autoreply/autoreply.cf ] ; then
+	. /etc/autoreply/autoreply.cf
+else
+	exit
+fi
+
+########################################################################
+
+find ${CACHE} -type f -name "*@*" -mtime +${DAYS} -delete
