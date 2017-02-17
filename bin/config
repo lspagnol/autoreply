@@ -228,6 +228,9 @@ while read LINE ; do
 					# Vérification de la cohérence des dates
 					[ ${END} -gt ${BEGIN} ] || exit 0
 
+					# Enregistrer les dates (commentaire) dans la configuration
+					echo -e "# ${_begin} -> ${_end}\n" > "${MACHINES}/${1}/cfg"
+
 					# Conversion des dates format EU pour la substition / motifs
 					_begin=$(Date4Sed ${_begin})
 					_end=$(Date4Sed ${_end})
@@ -244,7 +247,7 @@ while read LINE ; do
 
 					# Enregistrer la configuration
 					[ -d ${MACHINES}/${1} ] || mkdir ${MACHINES}/${1}
-					echo -e "BEGIN=\"${BEGIN}\"\nEND=\"${END}\"\nDATES=\"${DATES}\"\n" > "${MACHINES}/${1}/cfg"
+					echo -e "BEGIN=\"${BEGIN}\"\nEND=\"${END}\"\nDATES=\"${DATES}\"\n" >> "${MACHINES}/${1}/cfg"
 
 					# Notification
 					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_ENABLE} ${ORIGIN}")
