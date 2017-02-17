@@ -30,8 +30,15 @@ now=$(date +%s)
 
 # Trop tard pour déclencher le répondeur ?
 if [ ${now} -gt ${END} ] ; then
-	# supprimer le fichier de configuration pour neutraliser le répondeur
-	[ -f ${MACHINES}/${1}/cfg ] && rm ${MACHINES}/${1}/cfg
+	if [ -f ${MACHINES}/${1}/cfg ] ; then
+		# Supprimer le fichier de configuration pour neutraliser le répondeur
+		rm ${MACHINES}/${1}/cfg
+		# Purger le cache du répondeur
+		if [ -d ${CACHE}/${1} ] ; then
+			find ${CACHE}/${1} -type f -delete
+			rmdir ${CACHE}/${1}
+		fi
+	fi
 	exit 0
 fi
 
