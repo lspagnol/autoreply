@@ -16,6 +16,7 @@ chown -R root:root /etc/autoreply
 chmod 755 /etc/autoreply
 [ -f /etc/autoreply/msg ] || cp etc/msg /etc/autoreply/msg
 [ -f /etc/autoreply/autoreply.cf ] || cp etc/autoreply.cf /etc/autoreply/autoreply.cf
+[ -f /etc/autoreply/help ] || cp USAGE.md /etc/autoreply/help
 
 # Scripts
 [ -d /usr/local/autoreply ] || mkdir /usr/local/autoreply

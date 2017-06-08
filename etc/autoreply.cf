@@ -7,6 +7,9 @@ CACHE=/var/cache/autoreply
 # Message de réponse par défaut
 ANSWER=/etc/autoreply/msg
 
+# Message d'aide par défaut (mode d'emploi)
+HELP=/etc/autoreply/help
+
 DATES_TODAY="aujourd'hui"
 #DATES_TODAY="le ##TODAY##"
 DATES_RANGE="du ##BEGIN## au ##END## inclus"
@@ -27,6 +30,7 @@ NOTIF_STATUS_ENABLED="activé"
 NOTIF_STATUS_DISABLED="désactivé"
 NOTIF_ANSWER_RECORD="réponse enregistrée par"
 NOTIF_ANSWER_DEFAULT="réponse réinitialisée par"
+NOTIF_HELP="mode d'emploi"
 
 # Domaine de messagerie
 DOMAIN="mondomaine.fr"

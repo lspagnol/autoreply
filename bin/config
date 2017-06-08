@@ -113,7 +113,7 @@ while read LINE ; do
 					# Modification du répondeur => notifier l'expéditeur ET l'adresse du répondeur
 					mail_to="${from} ${to}"
 				;;
-				status)
+				status|help)
 					# Notifier seulement l'expéditeur
 					mail_to=${from}
 				;;
@@ -309,6 +309,15 @@ while read LINE ; do
 					exit 0
 
 				;;
+
+				help)
+
+					# Passer sur le mesage d'aide
+					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_HELP}")
+					cat ${HELP} |MailSend
+
+					# FIN
+					exit 0
 
 			esac
 
