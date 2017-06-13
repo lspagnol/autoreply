@@ -1,12 +1,20 @@
 # Notice utilisateur
 
 ## Généralités
+
 * Le répondeur automatique est contrôlé par mail.
+
 * L'adresse mail à contacter pour régler le répondeur est de la forme _MAIL-**autoreply**@DOMAINE_.
 * Exemple:
   * pour l'adresse «adresse-test@mondomaine.fr»,
   * l'adresse à contacter est «adresse-test-autoreply@mondomaine.fr».
+
 * Une commande **DOIT** être indiquée dans le champ «Sujet» / «Objet».
+
+* Une demande d'aide peut être envoyée à un adresse générique dédiée de la forme _autoreply@DOMAINE_.
+* Exemple:
+  * pour le domaine «mondomaine.fr»,
+  * l'adresse à contacter est «autoreply@mondomaine.fr».
 
 ## Les commandes du répondeur
 
