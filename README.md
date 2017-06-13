@@ -12,7 +12,7 @@ Il a éte conçu pour répondre à la problématique des adresses génériques g
  * Il repose sur 3 tables **Postfix**:
   * «bcc-reply» permet de rediriger une copie des mails vers les adresses de la table «aliases-reply»,
   * «aliases-reply» invoque le script du répondeur (son contenu n'est connu que du MTA local),
-  * «aliases-config» invoque le script de configuration du répondeur (le contenu doit être diffusé / connu à l'extérieur du MTA local).
+  * «aliases-config» invoque le script de configuration du répondeur (le contenu doit être diffusé / connu à l'extérieur du MTA local, mais il ne devrait pas être connu des serveurs MX).
  * Le script **reply** assure la fonction «répondeur automatique».
  * Le script **config** permet de traiter les commandes de configuration du répondeur par l'intermédiaire d'adresses dont la partie «alias» a le sufixe «-autoreply»:
   * Si l'adresse est «_MAIL@DOMAINE_»,
