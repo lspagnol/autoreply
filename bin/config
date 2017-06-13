@@ -127,6 +127,9 @@ while read LINE ; do
 
 				answer) # Réglage du message de réponse
 
+					# Ne rien faire pour l'alias de destination générique des demandes d'aide
+					[ "${to}" = "${HELP_ALIAS}@${DOMAIN}" ] && exit 0
+
 					case ${subject[2]} in
 
 						record) # Enregistrer le message reçu comme message de réponse
@@ -200,6 +203,9 @@ while read LINE ; do
 
 				enable) # Activer le répondeur
 
+					# Ne rien faire pour l'alias de destination générique des demandes d'aide
+					[ "${to}" = "${HELP_ALIAS}@${DOMAIN}" ] && exit 0
+
 					# Extraire date début
 					begin=${subject[2]}
 					if [ -z ${begin} ] ; then # pas de date de debut => aujourd'hui
@@ -260,6 +266,9 @@ while read LINE ; do
 
 				disable)
 
+					# Ne rien faire pour l'alias de destination générique des demandes d'aide
+					[ "${to}" = "${HELP_ALIAS}@${DOMAIN}" ] && exit 0
+
 					# Pas de répertoire de configuration pour ce répondeur => fin
 					[ -d ${MACHINES}/${1} ] || exit 0
 
@@ -282,6 +291,9 @@ while read LINE ; do
 				;;
 
 				status)
+
+					# Ne rien faire pour l'alias de destination générique des demandes d'aide
+					[ "${to}" = "${HELP_ALIAS}@${DOMAIN}" ] && exit 0
 
 					if [ -d ${MACHINES}/${1} ] ; then
 
@@ -314,10 +326,12 @@ while read LINE ; do
 
 					# Passer sur le mesage d'aide
 					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_HELP}")
-					cat ${HELP} |MailSend
+					cat ${HELP_MSG} |MailSend
 
 					# FIN
 					exit 0
+
+				;;
 
 			esac
 

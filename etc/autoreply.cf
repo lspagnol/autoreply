@@ -8,8 +8,12 @@ CACHE=/var/cache/autoreply
 ANSWER=/etc/autoreply/msg
 
 # Message d'aide par défaut (mode d'emploi)
-HELP=/etc/autoreply/help
+HELP_MSG=/etc/autoreply/help
 
+# Alias de destination générique pour les demandes d'aide
+HELP_ALIAS=autoreply
+
+# Chaines de substitution pour les dates
 DATES_TODAY="aujourd'hui"
 #DATES_TODAY="le ##TODAY##"
 DATES_RANGE="du ##BEGIN## au ##END## inclus"

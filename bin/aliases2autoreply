@@ -37,10 +37,19 @@ touch ${TMP}
 diff ${TMP} ${SRC} >/dev/null
 [ $? -eq 0 ] && exit 0
 
+# Copie en Bcc des messages vers les adresses locales des répondeurs
 cat ${SRC} |awk '{print $1" "$1"-reply"}' > /etc/autoreply/bcc-reply
-cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-reply: \"| /usr/local/autoreply/reply "$1"@"DOMAIN"\""}' > /etc/autoreply/aliases-reply
-cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-autoreply: \"| /usr/local/autoreply/config "$1"@"DOMAIN"\""}' > /etc/autoreply/aliases-config
 
+# Adresses locales des répondeurs
+cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-reply: \"| /usr/local/autoreply/reply "$1"@"DOMAIN"\""}' > /etc/autoreply/aliases-reply
+
+# Adresses de configuration des répondeurs
+cat<<EOF > /etc/autoreply/aliases-config
+${HELP_ALIAS}: "| /usr/local/autoreply/config ${HELP_ALIAS}@${DOMAIN}"
+EOF
+cat ${SRC} |awk -v DOMAIN=${DOMAIN} '{print $1"-autoreply: \"| /usr/local/autoreply/config "$1"@"DOMAIN"\""}' >> /etc/autoreply/aliases-config
+
+# Mise à jour des tables Postfix
 postmap /etc/autoreply/bcc-reply
 postalias /etc/autoreply/aliases-reply
 postalias /etc/autoreply/aliases-config
