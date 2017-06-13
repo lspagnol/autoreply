@@ -10,6 +10,10 @@
 
 ## Les commandes du répondeur
 
+* **help**
+  * **Demander la notice d'utilisation du répondeur.**
+  * La notice sera envoyée à l'expéditeur.
+
 * **status**
   * **Demander l'état du répondeur.**
   * Une notification d'état sera envoyée à l'expéditeur.
