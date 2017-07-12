@@ -11,7 +11,7 @@
 
 * Une commande **DOIT** être indiquée dans le champ «Sujet» / «Objet».
 
-* Une demande d'aide peut être envoyée à un adresse générique dédiée de la forme _autoreply@DOMAINE_.
+* Une demande d'aide peut être envoyée à une adresse générique dédiée de la forme _autoreply@DOMAINE_.
 * Exemple:
   * pour le domaine «mondomaine.fr»,
   * l'adresse à contacter est «autoreply@mondomaine.fr».

@@ -2,7 +2,7 @@
 
 ## Prérequis
  * MTA: Postfix,
- * commandes: «diff», «mailutils» et «git» (pour l'installatiob).
+ * commandes: «diff», «mailutils» et «git» (pour l'installation).
 
 ## Installation des scripts
  * Télécharger les scripts: ``git clone https://github.com/lspagnol/autoreply``
