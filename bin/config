@@ -280,6 +280,7 @@ while read LINE ; do
 
 					# Purger le cache d'adresses
 					rm ${CACHE}/${1}/* 2>/dev/null
+					rmdir ${CACHE}/${1} 2>/dev/null
 
 					# Notification
 					mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_DISABLE} ${ORIGIN}")
@@ -302,12 +303,22 @@ while read LINE ; do
 							# Charger la config du répondeur
 							. ${MACHINES}/${1}/cfg
 
-							# Notification
-							mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_STATUS_ENABLED}")
-							cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
+							# Trop tard pour déclencher le répondeur ?
+							if [ ${now} -gt ${END} ] ; then
 
-							# FIN
-							exit 0
+								# Désactiver le répondeur et purger le cache d'adresses
+								DisableFlush ${1}
+
+							else
+
+								# Notification répondeur activé
+								mail_subj=$(HdrEncode "${SUBJECT}: ${NOTIF_STATUS_ENABLED}")
+								cat ${msg} |sed "s/##DATES##/${DATES}/g" |MailSend
+
+								# FIN
+								exit 0
+
+							fi
 
 						fi
 
