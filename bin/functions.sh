@@ -1,3 +1,6 @@
+# Date actuelle => timestamp
+now=$(date +%s)
+
 # Charger le fichier de configuration
 if [ -f /etc/autoreply/autoreply.cf ] ; then
 	. /etc/autoreply/autoreply.cf
@@ -75,4 +78,19 @@ echo "${d[1]}/${d[0]}/${d[2]}" # afficher la date permutée
 # => Résultat sur sortie standard.
 function Date4Sed {
 echo ${@//\//\\/}
+}
+
+# Désactiver un répondeur
+# => Suppression du fichier de configuration du répondeur
+# => Purge du cache d'adresses mail
+function DisableFlush {
+if [ -f ${MACHINES}/${1}/cfg ] ; then
+	# Supprimer le fichier de configuration pour neutraliser le répondeur
+	rm ${MACHINES}/${1}/cfg
+fi
+if [ -d ${CACHE}/${1} ] ; then
+	# Purger le cache du répondeur
+	find ${CACHE}/${1} -type f -delete
+	rmdir ${CACHE}/${1}
+fi
 }
